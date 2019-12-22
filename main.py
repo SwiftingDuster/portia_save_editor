@@ -9,8 +9,11 @@
 # 4 Bytes > ArchiveItem objects count (int)
 
 # ? Bytes > ArchiveItem Key (string)
-# 4 Bytes > ArchiveItem Serialized Length (int)
-# ? Bytes > ArchiveItem Serialized Target (bytes[])
+# 4 Bytes > ArchiveItem Serialized Target Length (int)
+# ? Bytes > ArchiveItem Serialized Target (byte[])
+#   * The value of this secondary length is always (Serialized Target Length-4). Redundent header? *
+#   4 Bytes > Serialized Target Length Secondary (int)
+#   ? Bytes > Serialized Target Data (byte[])
 # 8 Bytes > CRC64 of Serialized Target (ulong)
 
 import struct
@@ -29,16 +32,17 @@ def showArchiveInfo():
           f'CFC: {crc}', sep='\n')
     if key == b'TimeManager':
         data_stream = io.BytesIO(data)
-        mystery_number = read_int32(data_stream)
+        data_length_sub = read_int32(data_stream)
         time_mgr_game_ticks = read_int64(data_stream)
         time_mgr_enabled = read_bool(data_stream)
-        print(f'Game Ticks: {time_mgr_game_ticks}',
+        print(f'Data Length Secondary: {data_length_sub}',
+              f'Game Ticks: {time_mgr_game_ticks}',
               f'Enabled: {time_mgr_enabled}', sep='\n')
     elif key == b'Pathea.Missions.MissionManager':
         data_stream = io.BytesIO(data)
-        mystery_number = read_int32(data_stream)
+        data_length_sub = read_int32(data_stream)
         version = read_int32(data_stream)
-        print(f'Mystery number: {mystery_number}',
+        print(f'Data Length Secondary: {data_length_sub}',
               f'Version: {version}', sep='\n')
         # Recent Delivery Order
         recent_delivery_order = read_int32(data_stream)
@@ -57,10 +61,10 @@ def showArchiveInfo():
             Mission().serialize(data_stream)
     elif key == b'Pathea.PlayerMissionMgr':
         data_stream = io.BytesIO(data)
-        mystery_number = read_int32(data_stream)
+        data_length_sub = read_int32(data_stream)
         version = read_int32(data_stream)
         id_generator = read_int32(data_stream)
-        print(f'Mystery number: {mystery_number}',
+        print(f'Data Length Secondary: {data_length_sub}',
               f'Version: {version}',
               f'Id Gen: {id_generator}', sep='\n')
 
