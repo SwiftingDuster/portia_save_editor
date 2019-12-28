@@ -17,7 +17,7 @@
 import io
 import struct
 
-from serialization import (ArchiveItem, Mission, MissionManager, TimeManager,
+from serialization import (ArchiveItem, OrderMission, MissionManager, TimeManager,
                            read_int32, read_int64, read_string, read_uint64)
 
 
@@ -31,7 +31,8 @@ def showArchiveInfo():
     elif key == b'Pathea.Missions.MissionManager':
         MissionManager(key, data_length, data, crc).print()
     else:
-        ArchiveItem(key, data_length, data, crc).print()
+        #ArchiveItem(key, data_length, data, crc).print()
+        pass
 
 
 with open('test.138182', 'rb') as f:

@@ -86,15 +86,27 @@ class MissionManager(ArchiveItem):
         # Recent Delivery Order
         self.recent_delivery_order = read_int32(data_stream)
         for _ in range(self.recent_delivery_order):
-            Mission.from_data_stream(data_stream)
+            OrderMission.from_data_stream(data_stream)
         # Running Order
         self.running_order = read_int32(data_stream)
         for _ in range(self.running_order):
-            Mission.from_data_stream(data_stream)
+            OrderMission.from_data_stream(data_stream)
         # Recent Submit Order
         self.recent_submit_order = read_int32(data_stream)
         for _ in range(self.recent_submit_order):
-            Mission.from_data_stream(data_stream)
+            OrderMission.from_data_stream(data_stream)
+        # Active Mission
+        self.mission_actived = read_int32(data_stream)
+        for _ in range(self.mission_actived):
+            OrderMission.from_data_stream(data_stream)
+        # Running Mission
+        self.mission_running = read_int32(data_stream)
+        for _ in range(self.mission_running):
+            OrderMission.from_data_stream(data_stream)
+        # Ended Mission
+        self.mission_end = read_int32(data_stream)
+        for _ in range(self.mission_end):
+            OrderMission.from_data_stream(data_stream)
 
     def print(self):
         super().print()
@@ -104,28 +116,28 @@ class MissionManager(ArchiveItem):
               f'Recent Submit Order: {self.recent_submit_order}', sep='\n')
 
 
-class Mission:
+class OrderMission:
     @staticmethod
-    def from_data_stream(data_stream):
-        state = read_int32(data_stream)
-        npc_id = read_int32(data_stream)
-        is_personal = read_bool(data_stream)
-        org_id = read_int32(data_stream)
-        item_id = read_int32(data_stream)
-        item_count = read_int32(data_stream)
-        reward_gold = read_int32(data_stream)
-        reward_exp = read_int32(data_stream)
-        reward_like = read_int32(data_stream)
-        reward_rep = read_int32(data_stream)
-        descrip_id = read_int32(data_stream)
-        submit_dialog = read_string(data_stream)
-        model_path = read_string(data_stream)
-        level = read_int32(data_stream)
-        deadline = read_int32(data_stream)
-        mission_id_no = read_int32(data_stream)
-        deliver_time = read_int64(data_stream)
-        submit_time = read_int64(data_stream)
-        return Mission(state, npc_id, is_personal, org_id, item_id, item_count, reward_gold, reward_exp, reward_like, reward_rep, descrip_id, submit_dialog, model_path, level, deadline, mission_id_no, deliver_time, submit_time)
+    def from_data_stream(data):
+        state = read_int32(data)
+        npc_id = read_int32(data)
+        is_personal = read_bool(data)
+        org_id = read_int32(data)
+        item_id = read_int32(data)
+        item_count = read_int32(data)
+        reward_gold = read_int32(data)
+        reward_exp = read_int32(data)
+        reward_like = read_int32(data)
+        reward_rep = read_int32(data)
+        descrip_id = read_int32(data)
+        submit_dialog = read_string(data)
+        model_path = read_string(data)
+        level = read_int32(data)
+        deadline = read_int32(data)
+        mission_id_no = read_int32(data)
+        deliver_time = read_int64(data)
+        submit_time = read_int64(data)
+        return OrderMission(state, npc_id, is_personal, org_id, item_id, item_count, reward_gold, reward_exp, reward_like, reward_rep, descrip_id, submit_dialog, model_path, level, deadline, mission_id_no, deliver_time, submit_time)
 
     def __init__(self, state, npc_id, is_personal, org_id, item_id, item_count, reward_gold,
                  reward_exp, reward_like, reward_rep, descrip_id, submit_dialog, model_path,
@@ -148,6 +160,64 @@ class Mission:
         self.mission_id_no = mission_id_no
         self.deliver_time = deliver_time
         self.submit_time = submit_time
+
+    def print(self):
+        print('-----   OrderMission Fields   -----')
+        print_fields(self)
+        print('----- End OrderMission Fields -----')
+
+
+class Mission:
+    @staticmethod
+    def from_data_stream(data):
+        instance_id = read_int32(data)
+        receive_time_limit_mode = read_int32(data)
+        receive_time_limit = read_string(data)
+        submit_time_limit_mode = read_int32(data)
+        submit_time_limit = read_string(data)
+        deliver_time = read_int64(data)
+        deliver_over_time = read_int64(data)
+        receive_time = read_int64(data)
+        receive_over_time = read_int64(data)
+        random_index_count = read_int32(data)
+        random_index_list = [read_int32(data)
+                             for _ in range(random_index_count)]
+        random_pick_index = read_int32(data)
+        receive_scene_item_type = read_int32(data)
+        if receive_scene_item_type != -1:
+            receive_scene_item_id = read_int32(data)
+        latest_state = read_int32(data)
+        accomplished_times = read_int32(data)
+        failed_times = read_int32(data)
+        mission_target_list_count = read_int32(data)
+        # TODO: Implement deserialization for MissionTarget types
+        mission_target_list = [_ for _ in range(mission_target_list_count)]
+        return Mission(instance_id, receive_time_limit_mode, receive_time_limit, submit_time_limit_mode, submit_time_limit, deliver_time, deliver_over_time,
+                       receive_time, receive_over_time, random_index_count, random_index_list, random_pick_index, receive_scene_item_type,
+                       receive_scene_item_id, latest_state, accomplished_times, failed_times, mission_target_list_count, mission_target_list)
+
+    def __init__(self, instance_id, receive_time_limit_mode, receive_time_limit, submit_time_limit_mode, submit_time_limit, deliver_time, deliver_over_time,
+                 receive_time, receive_over_time, random_index_count, random_index_list, random_pick_index, receive_scene_item_type,
+                 receive_scene_item_id, latest_state, accomplished_times, failed_times, mission_target_list_count, mission_target_list):
+        self.instance_id = instance_id
+        self.receive_time_limit_mode = receive_time_limit_mode
+        self.receive_time_limit = receive_time_limit
+        self.submit_time_limit_mode = submit_time_limit_mode
+        self.submit_time_limit = submit_time_limit
+        self.deliver_time = deliver_time
+        self.deliver_over_time = deliver_over_time
+        self.receive_time = receive_time
+        self.receive_over_time = receive_over_time
+        self.random_index_count = random_index_count
+        self.random_index_list = random_index_list
+        self.random_pick_index = random_pick_index
+        self.receive_scene_item_type = receive_scene_item_type
+        self.receive_scene_item_id = receive_scene_item_id
+        self.latest_state = latest_state
+        self.accomplished_times = accomplished_times
+        self.failed_times = failed_times
+        self.mission_target_list_count = mission_target_list_count
+        self.mission_target_list = mission_target_list
 
     def print(self):
         print('-----   Mission Fields   -----')
